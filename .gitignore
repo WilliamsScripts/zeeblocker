@@ -1,0 +1,30 @@
+# System Files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.log
+*.tmp
+
+# Build artifacts
+*.zip
+dist/
+
+# API Keys and Secrets (if any config files are added later)
+.env
+secrets.json
+
+# Node modules (if you decide to add build tools later)
+node_modules/
+
+# Chrome extension package
+*.crx
+*.pem
+

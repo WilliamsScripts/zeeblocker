@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Generate ZeeBlocker Icons</title>
+</head>
+<body>
+  <h1>Icon Generator for ZeeBlocker</h1>
+  <p>Open this in a browser and the icons will be auto-downloaded</p>
+  <canvas id="canvas16" width="16" height="16"></canvas>
+  <canvas id="canvas48" width="48" height="48"></canvas>
+  <canvas id="canvas128" width="128" height="128"></canvas>
+  
+  <script>
+    function generateIcon(size) {
+      const canvas = document.getElementById(`canvas${size}`);
+      const ctx = canvas.getContext('2d');
+      
+      // Gradient background
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      gradient.addColorStop(0, '#667eea');
+      gradient.addColorStop(1, '#764ba2');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, size, size);
+      
+      // White circle
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size*0.35, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Block symbol
+      ctx.strokeStyle = '#667eea';
+      ctx.lineWidth = size * 0.08;
+      ctx.beginPath();
+      ctx.moveTo(size * 0.3, size * 0.3);
+      ctx.lineTo(size * 0.7, size * 0.7);
+      ctx.stroke();
+      
+      // Download
+      canvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `icon${size}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    }
+    
+    // Generate all icons
+    setTimeout(() => {
+      generateIcon(16);
+      setTimeout(() => generateIcon(48), 100);
+      setTimeout(() => generateIcon(128), 200);
+    }, 500);
+  </script>
+</body>
+</html>
+
