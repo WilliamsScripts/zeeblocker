@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZeeBlocker</title>
+  <link rel="stylesheet" href="styles/popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Not Connected View -->
+    <div id="notConnectedView" class="hidden">
+      <header>
+        <h1>🎯 ZeeBlocker</h1>
+        <p class="subtitle">Connect to Dashboard</p>
+      </header>
+      
+      <main>
+        <div class="connect-card">
+          <div class="connect-icon">🔑</div>
+          <h2>Connect Your Browser</h2>
+          <p class="connect-description">
+            To use ZeeBlocker, connect this browser to your dashboard account.
+          </p>
+          
+          <div class="form-group">
+            <label for="apiKeyInput">API Key</label>
+            <input 
+              type="password" 
+              id="apiKeyInput" 
+              placeholder="Enter your API key (zbk_...)"
+              class="input-field"
+            >
+            <small>Get your API key from the dashboard</small>
+          </div>
+          
+          <button id="connectBtn" class="btn btn-primary full-width">
+            Connect to Dashboard
+          </button>
+          
+          <div class="divider">
+            <span>Don't have an account?</span>
+          </div>
+          
+          <a href="http://localhost:3000/connect" target="_blank" class="btn btn-secondary full-width">
+            📖 Setup Guide
+          </a>
+          
+          <a href="http://localhost:3000/signup" target="_blank" class="btn btn-link">
+            Create Account
+          </a>
+        </div>
+      </main>
+    </div>
+
+    <!-- Connected View -->
+    <div id="connectedView" class="hidden">
+      <header>
+        <div class="header-content">
+          <div>
+            <h1>🎯 ZeeBlocker</h1>
+            <p class="subtitle" id="userEmail">Connected</p>
+          </div>
+          <button id="settingsBtn" class="icon-btn" title="Settings">⚙️</button>
+        </div>
+      </header>
+
+      <main>
+        <!-- Stats Card -->
+        <div class="stats-card">
+          <h2>Today's Stats</h2>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-number" id="blockedCount">0</span>
+              <span class="stat-label">Blocked</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number" id="focusTime">0h</span>
+              <span class="stat-label">Focus Time</span>
+            </div>
+          </div>
+          <div class="sync-status">
+            <span id="syncStatus" class="sync-text">🔄 Syncing...</span>
+          </div>
+        </div>
+
+        <!-- Focus Mode Control -->
+        <div class="control-card">
+          <div class="control-item">
+            <div class="control-info">
+              <h3>🎯 Focus Mode</h3>
+              <p>Block all distracting sites</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="focusModeToggle">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Tasks Section -->
+        <div class="tasks-section">
+          <div class="tasks-header">
+            <h3>Today's Tasks</h3>
+            <button id="addTaskBtn" class="btn btn-primary btn-small">+ Add</button>
+          </div>
+
+          <div id="addTaskForm" class="add-task-form hidden">
+            <input 
+              type="text" 
+              id="taskTitleInput" 
+              placeholder="Task title"
+              class="input-field"
+            >
+            <input 
+              type="time" 
+              id="taskTimeInput" 
+              class="input-field"
+            >
+            <div class="form-actions">
+              <button id="saveTaskBtn" class="btn btn-primary btn-small">Save</button>
+              <button id="cancelTaskBtn" class="btn btn-secondary btn-small">Cancel</button>
+            </div>
+          </div>
+
+          <div id="taskList" class="task-list">
+            <div class="empty-tasks">
+              No tasks yet. Add one to get started!
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="actions">
+          <a href="http://localhost:3000/dashboard" target="_blank" class="btn btn-secondary full-width">
+            📊 Open Dashboard
+          </a>
+        </div>
+        
+        <div class="footer-info">
+          <small>⚙️ Manage blocklists and settings from the dashboard</small>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script src="popup.js"></script>
+</body>
+</html>

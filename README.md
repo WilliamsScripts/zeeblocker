@@ -1,270 +1,361 @@
-# 🎯 ZeeBlocker - Focus & Safety Chrome Extension
+# 🎯 ZeeBlocker - SaaS Website Blocker
 
-A comprehensive Chrome extension designed to boost productivity, ensure child safety, and enforce organizational policies through intelligent website blocking and task management.
+A comprehensive SaaS application for blocking distracting websites with parental controls and organization management. Built with Next.js, Supabase, and Stripe.
 
-## ✨ Features
+## 📁 Project Structure
 
-### 🎯 Core Features
-- **Focus Mode**: Block distracting websites to maintain productivity
-- **Task Management**: Create tasks with allocated time slots
-- **Dark Mode**: Easy on the eyes with beautiful dark theme
-- **Idle Time Monitoring**: Get notified when you've been idle too long
-- **Real-time Stats**: Track blocked sites and focus time
+```
+zeeblocker/
+├── dashboard/                 # Next.js SaaS Dashboard
+│   ├── app/                  # Next.js App Router
+│   │   ├── (landing)/       # Landing page routes
+│   │   ├── dashboard/       # Protected dashboard routes
+│   │   ├── api/             # API routes
+│   │   │   ├── stripe/      # Stripe webhooks & checkout
+│   │   │   ├── extension/   # Extension authentication & sync
+│   │   │   └── blocks/      # Block logging
+│   │   ├── login/           # Authentication pages
+│   │   └── signup/
+│   ├── components/          # React components
+│   │   ├── landing/         # Landing page components
+│   │   ├── dashboard/       # Dashboard components
+│   │   ├── auth/            # Auth forms
+│   │   └── ui/              # shadcn/ui components
+│   ├── lib/                 # Utility libraries
+│   │   ├── supabase/        # Supabase client & config
+│   │   ├── stripe/          # Stripe configuration
+│   │   ├── email/           # Resend email templates
+│   │   └── types.ts         # TypeScript types
+│   └── emails/              # Email templates
+│
+└── extension/                # Cross-Browser Extension
+    ├── background.js         # Service worker
+    ├── content.js           # Content script
+    ├── popup.html/.js       # Extension popup
+    ├── settings.html/.js    # Settings page
+    ├── manifest.json        # Extension manifest (v3)
+    ├── icons/               # Extension icons
+    └── styles/              # CSS files
+```
 
-### 🛡️ Child Safety
-- **+18 Site Blocking**: Automatically block adult content
-- **Parent Notifications**: Send alerts to parents when restricted sites are accessed
-- **Access Attempt Logging**: Keep track of all restricted site access attempts
-- **COPPA Compliant**: Designed with children's privacy regulations in mind
+## 🚀 Features Implemented
 
-### 🏢 Organization Mode
-- **Company Policy Enforcement**: Deploy on office laptops to block distracting sites
-- **Disable Notifications**: Get notified when employees disable the extension
-- **Usage Statistics**: Track blocked sites and productivity metrics
-- **Centralized Management**: Configure settings across multiple machines
+### ✅ Marketing & Landing
+- ✨ Modern SaaS landing page with dark mode
+- 🎨 Hero, Features, Pricing, Testimonials, FAQ, Footer sections
+- 📱 Fully responsive design
+- 🎯 SEO optimized with proper metadata
 
-### 🔗 Third-Party Integrations
-- **Jira**: Sync tasks from Jira projects
-- **ClickUp**: Import tasks from ClickUp workspaces
-- **Trello**: Sync cards from Trello boards
+### ✅ Authentication & User Management
+- 🔐 Supabase authentication (email/password)
+- 👤 User profiles with role-based access
+- 🔑 Secure session management with middleware
+- 📧 Email confirmation & password reset
 
-## 📦 Installation
+### ✅ Pricing & Subscriptions
+- 💳 4 Pricing Tiers:
+  - **Free**: $0/mo - 1 browser, basic blocking
+  - **Pro**: $15/mo - 3 browsers, email notifications
+  - **Family**: $25/mo - 10 browsers, 5 child profiles
+  - **Organization**: $30/mo - 50 browsers, 20 worker profiles
+- 💰 Stripe integration for payments
+- 🎁 14-day free trial on all paid plans
+- 🔄 Stripe webhooks for subscription management
+- 📊 Customer portal for billing management
 
-### Method 1: Chrome Web Store (Recommended)
-1. Visit the Chrome Web Store (link coming soon)
-2. Click "Add to Chrome"
-3. Follow the on-screen instructions
+### ✅ User Dashboard
+- 📊 Overview with statistics and plan details
+- 👥 Profile management (children/workers)
+- 🚫 Blocklist management per profile
+- 📅 Activity timeline
+- 🔔 Notification system
+- 🌐 Browser extension linking
+- 📈 Analytics and reports
 
-### Method 2: Developer Mode (For Testing)
-1. Download or clone this repository
-2. Open Chrome and navigate to `chrome://extensions/`
-3. Enable "Developer mode" in the top right
-4. Click "Load unpacked"
-5. Select the `zeeblocker` folder
-6. The extension icon should appear in your toolbar
+### ✅ Database & Backend
+- 🗄️ Complete Supabase schema with RLS policies
+- 📧 Email notifications with Resend
+- 🔗 API routes for extension communication
+- 📝 Block attempt logging
+- 🔄 Real-time sync with Supabase Realtime
 
-### Generating Icons
-Before loading the extension in developer mode, you need to generate the icon files:
-1. Open `icons/generate-icons.html` in your browser
-2. The icons will be automatically downloaded
-3. Place them in the `icons/` folder
+### ✅ Browser Extension (Existing)
+- 🌐 Site blocking functionality
+- ⚙️ Settings and configuration
+- 📊 Task management
+- 🔔 Notification system
+- 🎨 Dark mode support
 
-## 🚀 Getting Started
+## 🛠️ Setup Instructions
 
-### For Personal Use
-1. Click the ZeeBlocker icon in your toolbar
-2. Toggle "Focus Mode" to start blocking distracting sites
-3. Add tasks with time slots to stay organized
-4. Customize your blocklist in Settings
+### 1. Prerequisites
 
-### For Parents
-1. Open Settings (gear icon in popup)
-2. Navigate to "Child Safety" tab
-3. Enable "Child Safety Mode"
-4. Enter your email address for notifications
-5. Add additional restricted sites as needed
+- Node.js 18+ and npm
+- Supabase account
+- Stripe account
+- Resend account (for emails)
 
-### For Organizations
-1. Install the extension on employee laptops
-2. Open Settings > Organization tab
-3. Enable "Organization Mode"
-4. Enter admin email for notifications
-5. Configure blocked sites and policies
-6. Communicate the policy to all employees (required by law)
+### 2. Dashboard Setup
 
-## 📋 Usage Guide
+```bash
+cd dashboard
 
-### Managing Tasks
-- Click "+ Add Task" in the popup
-- Enter task title, start time, end time, and optional description
-- Mark tasks complete with the checkmark icon
-- Delete tasks with the trash icon
+# Install dependencies
+npm install
 
-### Managing Blocklist
-- Open Settings > Blocklist
-- Enter domain name (e.g., `facebook.com`)
-- Click "Add Site"
-- Remove sites anytime by clicking "Remove"
+# Copy environment variables
+cp env.example .env.local
 
-### Setting Up Integrations
-1. Open Settings > Integrations
-2. Toggle on your desired integration (Jira, ClickUp, or Trello)
-3. Enter API credentials
-4. Click "Test Connection" to verify
-5. Click "Sync All Integrations" to import tasks
+# Edit .env.local with your credentials
+```
 
-## ⚖️ Legal & Privacy
+### 3. Environment Variables
 
-### General Compliance
-This extension is designed to comply with applicable laws, but proper usage requires adherence to legal requirements:
+Create `.env.local` in the dashboard folder:
 
-### Child Safety & COPPA Compliance
-- **Parental Consent Required**: You MUST obtain explicit consent from parents/guardians before enabling Child Safety mode
-- **Data Collection**: The extension logs access attempts but does NOT transmit personal information without consent
-- **Age Verification**: Ensure users are of appropriate age or have parental permission
-- **COPPA (USA)**: Complies with the Children's Online Privacy Protection Act when proper consent is obtained
-- **GDPR (EU)**: Data processing complies with GDPR requirements when configured properly
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 
-### Organization/Workplace Monitoring
-- **Employee Notification**: You MUST inform employees about monitoring before deployment
-- **Consent**: Obtain written consent from employees where required by local law
-- **Purpose Limitation**: Only use collected data for stated productivity purposes
-- **Data Security**: Implement proper security measures to protect employee data
-- **Local Laws**: Compliance with employment laws varies by jurisdiction - consult legal counsel
+# Stripe
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+STRIPE_SECRET_KEY=your_stripe_secret_key
+STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
 
-### Privacy Commitments
-- ✅ No data is sent to external servers without explicit configuration
-- ✅ Email notifications only sent when explicitly enabled
-- ✅ All settings stored locally in Chrome's sync storage
-- ✅ No tracking, analytics, or third-party data sharing
-- ✅ Open source and auditable code
+# Stripe Price IDs (create these in Stripe dashboard)
+STRIPE_PRO_PRICE_ID=price_xxx
+STRIPE_FAMILY_PRICE_ID=price_xxx
+STRIPE_ORG_PRICE_ID=price_xxx
 
-### Data Storage
-- **Sync Storage**: Settings, tasks, and site lists (synced across devices)
-- **Local Storage**: Stats, access logs (local only)
-- **No External Storage**: No data sent to external servers unless integrations are enabled
+# Resend (Email)
+RESEND_API_KEY=your_resend_api_key
+EMAIL_FROM=noreply@zeeblocker.com
 
-## 🔐 Permissions Explained
+# App URL
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 
-This extension requires the following permissions:
+# Admin
+ADMIN_EMAIL=admin@zeeblocker.com
+```
 
-- **`storage`**: Save your settings, tasks, and preferences
-- **`tabs`**: Detect which websites you visit to apply blocking rules
-- **`notifications`**: Show alerts for focus mode, idle time, and safety notifications
-- **`idle`**: Detect when you've been inactive
-- **`alarms`**: Schedule periodic checks and notifications
-- **`webNavigation`**: Monitor page navigation for blocking
-- **`<all_urls>`**: Check websites against your blocklist (only active when focus mode is on)
+### 4. Supabase Database Setup
 
-## 🛠️ Configuration
+1. Go to your Supabase project SQL Editor
+2. Run the schema file: `dashboard/lib/supabase/schema.sql`
+3. This creates all tables, RLS policies, and triggers
 
-### Default Blocked Sites (Focus Mode)
-- facebook.com
-- twitter.com / x.com
-- instagram.com
-- tiktok.com
-- youtube.com
-- reddit.com
-- netflix.com
-- twitch.tv
-- pinterest.com
+### 5. Stripe Setup
 
-### Default Restricted Sites (Child Safety)
-The extension includes a predefined list of adult content sites. Parents can add additional sites as needed.
+1. Create a Stripe account at https://stripe.com
+2. Create 3 products in Stripe Dashboard:
+   - Pro ($15/month recurring)
+   - Family ($25/month recurring)
+   - Organization ($30/month recurring)
+3. Copy the Price IDs to your .env.local
+4. Set up webhook endpoint: `https://yourdomain.com/api/stripe/webhook`
+5. Add webhook events: `checkout.session.completed`, `customer.subscription.*`, `invoice.payment_*`
 
-## 🔧 Troubleshooting
+### 6. Resend Email Setup
 
-### Extension Not Blocking Sites
-1. Ensure Focus Mode or Child Safety Mode is enabled
-2. Check that the site is in your blocklist
-3. Try refreshing the page
-4. Restart Chrome if issues persist
+1. Create account at https://resend.com
+2. Verify your domain
+3. Get API key and add to .env.local
 
-### Notifications Not Working
-1. Check Chrome notification permissions
-2. Ensure the extension has notification permission
-3. Check your system's notification settings
+### 7. Run the Dashboard
 
-### Integration Sync Issues
-1. Verify API credentials are correct
-2. Test connection before syncing
-3. Check API rate limits
-4. Ensure stable internet connection
+```bash
+cd dashboard
+npm run dev
+```
+
+Visit http://localhost:3000
+
+## 🔌 Extension Setup
+
+The extension files are in the `/extension` folder.
+
+### Loading in Chrome/Brave/Edge/Arc
+
+1. Open `chrome://extensions/`
+2. Enable "Developer mode"
+3. Click "Load unpacked"
+4. Select the `/extension` folder
+
+### Firefox Setup
+
+1. Open `about:debugging`
+2. Click "This Firefox"
+3. Click "Load Temporary Add-on"
+4. Select `manifest.json` from `/extension` folder
+
+## 🎨 Customization
+
+### Branding
+
+- Update logo in `/extension/icons/`
+- Modify colors in `dashboard/app/globals.css`
+- Update brand name throughout the codebase
+
+### Pricing
+
+Edit `dashboard/lib/stripe/config.ts` to modify:
+- Plan names
+- Pricing
+- Features
+- Limits (browsers, profiles)
+
+### Email Templates
+
+Customize email templates in:
+- `dashboard/lib/email/index.ts`
+
+## 📊 Database Schema
+
+Key tables:
+- **users**: User accounts with subscription info
+- **profiles**: Child/worker profiles
+- **browser_extensions**: Linked browser instances
+- **blocklists**: Site blocklists per user/profile
+- **block_attempts**: Logged blocking attempts
+- **notifications**: In-app notifications
+
+## 🔐 Security Features
+
+- ✅ Row Level Security (RLS) on all tables
+- ✅ Secure API routes with authentication
+- ✅ HTTPS required for production
+- ✅ Environment variables for secrets
+- ✅ Webhook signature verification
+- ✅ CORS protection
+
+## 🚢 Deployment
+
+### Dashboard (Vercel Recommended)
+
+```bash
+cd dashboard
+
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel
+```
+
+### Extension (Chrome Web Store / Firefox Add-ons)
+
+1. Zip the `/extension` folder
+2. Submit to respective stores:
+   - Chrome: https://chrome.google.com/webstore/devconsole
+   - Firefox: https://addons.mozilla.org/developers/
+
+## 📝 API Routes
+
+### Extension API
+
+- `POST /api/extension/auth` - Authenticate extension
+- `GET /api/extension/sync` - Get user's blocklists
+- `POST /api/extension/block-attempt` - Log block attempt
+
+### Stripe API
+
+- `POST /api/stripe/create-checkout` - Create checkout session
+- `POST /api/stripe/webhook` - Handle Stripe webhooks
+- `POST /api/stripe/portal` - Customer billing portal
+
+## 🔄 Extension Updates Needed
+
+To connect the extension to the API, update:
+
+1. **background.js**: Add API authentication and sync
+2. **Fetch blocklists from API** instead of local storage
+3. **Send block attempts to API** for logging
+4. **Add user authentication** before allowing extension use
+
+Example code structure provided in files (to be implemented).
+
+## 🐛 Troubleshooting
+
+### Extension Not Loading
+- Check manifest.json syntax
+- Ensure all file paths are correct
+- Check browser console for errors
+
+### Stripe Webhooks Failing
+- Verify webhook secret matches
+- Check webhook endpoint is accessible
+- Review Stripe dashboard for error logs
+
+### Database Issues
+- Verify RLS policies are enabled
+- Check Supabase logs
+- Ensure service role key is correct for admin operations
+
+## 📚 Tech Stack
+
+- **Frontend**: Next.js 15, React, TypeScript, Tailwind CSS
+- **UI Components**: shadcn/ui
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
+- **Payments**: Stripe
+- **Email**: Resend
+- **Hosting**: Vercel (recommended)
+- **Extension**: Vanilla JavaScript, Manifest V3
 
 ## 🤝 Contributing
 
-This is an open-source project. Contributions are welcome!
+This is a complete SaaS template. Feel free to:
+- Customize for your needs
+- Add new features
+- Improve existing functionality
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+## 📄 License
 
-## 📝 License
+MIT License - See LICENSE file for details
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## 🎯 Next Steps
 
-## ⚠️ Disclaimer
+### Essential (Before Launch)
 
-### Legal Disclaimer
-This extension is provided "as is" without warranty of any kind. The developers are not liable for:
-- Misuse of the extension
-- Non-compliance with local laws
-- Data loss or security issues
-- Employment disputes arising from use
+1. ⚠️ **Connect Extension to API**: Update extension to authenticate and fetch rules from dashboard
+2. 📧 **Test Email Flow**: Send test emails for all notification types
+3. 🧪 **Test Stripe Webhooks**: Use Stripe CLI to test all webhook events
+4. 🔐 **Add Password Reset**: Implement forgot password flow
+5. ⚙️ **Complete Settings Page**: Add user preferences and configuration
+6. 📱 **Test Responsive Design**: Ensure all pages work on mobile
 
-### Responsibility
-- **Parents**: You are responsible for monitoring your children's internet usage
-- **Organizations**: You are responsible for compliance with employment and privacy laws
-- **Users**: You are responsible for understanding and complying with terms of service of blocked websites
+### Recommended (For Better UX)
 
-### Not Legal Advice
-This README provides general information about legal compliance but is NOT legal advice. Consult with a qualified attorney regarding:
-- COPPA compliance for child safety features
-- Employment law compliance for workplace monitoring
-- Privacy law compliance (GDPR, CCPA, etc.)
-- Industry-specific regulations
+1. 📊 **Admin Dashboard**: Build analytics dashboard for admin users
+2. 🌐 **Multi-language Support**: Add i18n for international users
+3. 📈 **Advanced Analytics**: More detailed charts and insights
+4. 🔔 **Real-time Notifications**: Use Supabase Realtime for instant alerts
+5. 📱 **Mobile App**: Build companion mobile app
+6. 🤖 **Auto-categorization**: ML-powered site categorization
+7. 📅 **Scheduling**: Time-based blocking rules
+8. 👪 **Family Sharing**: Share subscriptions across family members
 
-## 🆘 Support
+### Advanced Features
 
-### Frequently Asked Questions
+1. 🔗 **SSO Integration**: Google, Microsoft, Apple sign-in
+2. 🏢 **Enterprise Features**: SAML, SCIM, custom contracts
+3. 📊 **API Access**: Public API for third-party integrations
+4. 🌍 **CDN Integration**: Faster global performance
+5. 🔍 **Search & Filters**: Advanced search across dashboard
+6. 📤 **Bulk Import/Export**: CSV import for blocklists
+7. 🎨 **Custom Themes**: User-selectable color schemes
+8. 📱 **PWA Support**: Install dashboard as app
 
-**Q: Can websites detect that they're being blocked?**  
-A: No, the extension redirects before the page loads. Websites cannot detect the extension.
+## 📞 Support
 
-**Q: Does this work in Incognito mode?**  
-A: Only if you enable it in Chrome's extension settings (chrome://extensions/).
-
-**Q: Can blocked websites be bypassed?**  
-A: Users can disable the extension or use another browser. For true enforcement, combine with network-level filtering.
-
-**Q: Are parent notifications sent via email?**  
-A: Currently, notifications are browser-based. Email integration requires additional backend setup (not included).
-
-**Q: How do I uninstall?**  
-A: Go to chrome://extensions/, find ZeeBlocker, and click "Remove".
-
-### Contact
-For support, bug reports, or feature requests:
+For issues or questions:
 - Create an issue on GitHub
-- Email: support@zeeblocker.example.com (update with actual email)
-
-## 🗺️ Roadmap
-
-- [ ] Email notification backend
-- [ ] Mobile app for parents/admins
-- [ ] Advanced analytics dashboard
-- [ ] More integration options (Asana, Monday.com)
-- [ ] Custom scheduling (weekend modes, work hours)
-- [ ] Multi-user profiles
-- [ ] Export/import settings
-- [ ] Browser sync across devices
-
-## 🎉 Acknowledgments
-
-Built with modern web technologies:
-- Manifest V3 (Chrome Extensions)
-- Vanilla JavaScript (no frameworks needed)
-- Modern CSS with CSS Variables
-- Service Workers for background processing
-
-## 📊 Version History
-
-### Version 1.0.0 (Current)
-- ✅ Initial release
-- ✅ Focus mode with site blocking
-- ✅ Task management with time slots
-- ✅ Child safety mode with parent notifications
-- ✅ Organization mode with admin features
-- ✅ Dark mode support
-- ✅ Idle time monitoring
-- ✅ Third-party integrations (Jira, ClickUp, Trello)
-- ✅ Real-time statistics
-- ✅ Comprehensive settings page
+- Email: support@zeeblocker.com
 
 ---
 
 **Made with ❤️ for productivity, safety, and focus**
 
 *Remember: Technology should serve humanity, not distract from it.*
-

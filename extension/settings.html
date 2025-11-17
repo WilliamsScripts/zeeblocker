@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZeeBlocker Settings</title>
+  <link rel="stylesheet" href="styles/settings.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎯 ZeeBlocker Settings</h1>
+      <p class="subtitle">Configure your browser extension</p>
+    </header>
+
+    <main class="content">
+      <!-- Dashboard Connection Section -->
+      <section class="section-card hidden">
+        <h2>📡 Dashboard Connection</h2>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3>API Key</h3>
+            <p>Your unique key to connect this browser to your dashboard</p>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <input type="password" id="apiKey" placeholder="Enter your API key (zbk_...)" class="input-field">
+          <small>Get your API key from <a href="http://localhost:3000/dashboard/browsers" target="_blank">Dashboard → Browsers</a></small>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3>Auto-Sync</h3>
+            <p>Automatically sync blocklists from dashboard</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="syncEnabledToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div id="syncStatus" class="sync-status hidden">
+          <div class="status-indicator">
+            <span id="syncStatusIcon">🔄</span>
+            <span id="syncStatusText">Checking...</span>
+          </div>
+          <small id="syncStatusDetails"></small>
+        </div>
+
+        <div class="alert alert-info">
+          <strong>ℹ️ Note:</strong> All blocklists, profiles, and advanced settings are managed from your dashboard.
+        </div>
+      </section>
+
+      <!-- General Settings Section -->
+      <section class="section-card">
+        <h2>⚙️ General Settings</h2>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3>Dark Mode</h3>
+            <p>Enable dark theme for the extension</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="darkModeToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3>Idle Time Notifications</h3>
+            <p>Get notified when you've been idle</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="idleCheckToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="input-group" id="idleThresholdGroup">
+          <label for="idleThreshold">Idle Time Threshold (minutes)</label>
+          <input type="number" id="idleThreshold" min="1" max="60" value="10" class="input-field">
+        </div>
+      </section>
+
+      <!-- Quick Links Section -->
+      <section class="section-card">
+        <h2>🔗 Quick Links</h2>
+        
+        <div class="quick-links">
+          <a href="http://localhost:3000/dashboard" target="_blank" class="link-btn">
+            📊 Open Dashboard
+          </a>
+          <a href="http://localhost:3000/dashboard/blocklists" target="_blank" class="link-btn">
+            🚫 Manage Blocklists
+          </a>
+          <a href="http://localhost:3000/dashboard/profiles" target="_blank" class="link-btn">
+            👨‍👩‍👧‍👦 Manage Profiles
+          </a>
+          <a href="http://localhost:3000/dashboard/browsers" target="_blank" class="link-btn">
+            🌐 Connected Browsers
+          </a>
+          <a href="http://localhost:3000/connect" target="_blank" class="link-btn">
+            📖 Setup Guide
+          </a>
+        </div>
+      </section>
+
+      <!-- About Section -->
+      <section class="section-card">
+        <h2>ℹ️ About</h2>
+        <div class="about-content">
+          <p><strong>ZeeBlocker Extension</strong></p>
+          <p>Version 1.0.0</p>
+          <p class="muted">This extension requires an active dashboard account to function.</p>
+          
+          <div class="button-group">
+            <button id="disconnectBtn" class="btn btn-danger">
+              Disconnect Browser
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="settings-footer">
+      <button id="saveBtn" class="btn btn-primary">💾 Save Settings</button>
+      <button id="resetBtn" class="btn btn-secondary">🔄 Reset to Defaults</button>
+    </footer>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script src="settings.js"></script>
+</body>
+</html>
