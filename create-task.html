@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Task - ZeeBlocker</title>
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/create-task.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <button id="backBtn" class="icon-btn" title="Cancel" aria-label="Cancel"></button>
+      <h1>New Task</h1>
+    </header>
+
+    <main>
+      <div class="card form-card">
+        <div class="field">
+          <label for="taskTitle">Title</label>
+          <input type="text" id="taskTitle" class="input-field" placeholder="e.g., Write project proposal" maxlength="120">
+        </div>
+
+        <div class="field">
+          <label for="taskDescription">Description <span class="hint">(optional)</span></label>
+          <textarea id="taskDescription" class="input-field" placeholder="Add any notes about this task"></textarea>
+        </div>
+
+        <div class="field">
+          <div class="time-field-header">
+            <label>Duration</label>
+            <button type="button" id="customToggle" class="link-btn">Enter custom time</button>
+          </div>
+
+          <div id="sliderMode" class="time-mode">
+            <div class="slider-value" id="durationDisplay">25 min</div>
+            <input type="range" class="slider" id="durationSlider" min="5" max="120" step="5" value="25">
+            <div class="slider-scale">
+              <span>5 min</span>
+              <span>120 min</span>
+            </div>
+          </div>
+
+          <div id="customMode" class="time-mode hidden">
+            <div class="custom-input-row">
+              <input type="number" id="customMinutes" class="input-field" min="1" max="600" value="25">
+              <span class="unit-label">minutes</span>
+            </div>
+            <button type="button" id="sliderToggle" class="link-btn">Use slider instead</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="saveTaskBtn" class="btn btn-primary btn-full"></button>
+        <button id="cancelTaskBtn" class="btn btn-secondary btn-full">Cancel</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="icons.js"></script>
+  <script src="create-task.js"></script>
+</body>
+</html>

@@ -9,8 +9,7 @@
     "notifications",
     "idle",
     "alarms",
-    "webNavigation",
-    "management"
+    "webNavigation"
   ],
   "host_permissions": ["<all_urls>"],
   "background": {

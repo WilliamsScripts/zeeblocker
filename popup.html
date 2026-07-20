@@ -4,90 +4,142 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ZeeBlocker</title>
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/components.css">
   <link rel="stylesheet" href="styles/popup.css">
 </head>
 <body>
   <div class="container">
     <header>
       <div class="header-content">
-        <h1>🎯 ZeeBlocker</h1>
+        <div class="brand" id="brandLogo"></div>
         <div class="header-controls">
-          <button id="themeToggle" class="icon-btn" title="Toggle Dark Mode">
-            <span class="theme-icon">🌙</span>
-          </button>
-          <button id="settingsBtn" class="icon-btn" title="Settings">⚙️</button>
+          <button id="themeToggle" class="icon-btn" title="Toggle dark mode" aria-label="Toggle dark mode"></button>
+          <button id="settingsBtn" class="icon-btn" title="Settings" aria-label="Open settings"></button>
         </div>
       </div>
     </header>
 
-    <!-- Focus Mode Section -->
-    <section class="focus-section">
-      <div class="focus-header">
-        <h2>Focus Mode</h2>
-        <div class="toggle-container">
-          <label class="toggle-switch">
-            <input type="checkbox" id="focusModeToggle">
-            <span class="toggle-slider"></span>
-          </label>
-          <span id="focusStatus" class="status-text">Off</span>
-        </div>
-      </div>
-      <p class="focus-description">Block distracting websites to stay productive</p>
-    </section>
+    <!-- Home view: two primary actions + analytics -->
+    <main id="homeView" class="view">
+      <section class="action-grid">
+        <button id="focusNowBtn" class="action-tile action-tile-primary">
+          <span class="action-tile-icon"></span>
+          <span class="action-tile-label">Focus Now</span>
+          <span class="action-tile-sub">Pick a task &amp; duration</span>
+        </button>
+        <button id="createTaskHomeBtn" class="action-tile">
+          <span class="action-tile-icon"></span>
+          <span class="action-tile-label">Create Task</span>
+          <span class="action-tile-sub">Add something to focus on</span>
+        </button>
+      </section>
 
-    <!-- Task List Section -->
-    <section class="tasks-section">
-      <div class="section-header">
-        <h2>Tasks & Time Slots</h2>
-        <button id="addTaskBtn" class="btn-primary">+ Add Task</button>
-      </div>
-      
-      <div id="taskList" class="task-list"></div>
-      
-      <!-- Add Task Form -->
-      <div id="addTaskForm" class="add-task-form hidden">
-        <input type="text" id="taskTitle" placeholder="Task title" class="input-field">
-        <div class="time-inputs">
-          <input type="time" id="taskStartTime" class="input-field">
-          <span>to</span>
-          <input type="time" id="taskEndTime" class="input-field">
+      <section class="card analytics-card">
+        <div class="score-block" title="Based on task completion and accumulated focus time">
+          <div class="score-ring-wrap">
+            <svg class="progress-ring score-ring" viewBox="0 0 120 120">
+              <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+              <circle class="ring-fg" id="scoreRing" cx="60" cy="60" r="52"></circle>
+            </svg>
+            <div class="score-center">
+              <div id="scoreValue" class="score-value">0</div>
+              <div class="score-max">/100</div>
+            </div>
+          </div>
+          <div class="score-label">Focus Score</div>
         </div>
-        <textarea id="taskDescription" placeholder="Description (optional)" class="input-field"></textarea>
-        <div class="form-actions">
-          <button id="saveTaskBtn" class="btn-primary">Save</button>
-          <button id="cancelTaskBtn" class="btn-secondary">Cancel</button>
+
+        <div class="stats-list">
+          <div class="stat-row">
+            <span class="stat-value" id="blockedCount">0</span>
+            <span class="stat-label">Sites Blocked</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-value" id="focusTime">0m</span>
+            <span class="stat-label">Focus Time</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-value" id="tasksCompleted">0</span>
+            <span class="stat-label">Tasks Done</span>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Quick Stats -->
-    <section class="stats-section">
-      <div class="stat-card">
-        <div class="stat-value" id="blockedToday">0</div>
-        <div class="stat-label">Blocked Today</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="focusTime">0h</div>
-        <div class="stat-label">Focus Time</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="tasksCompleted">0</div>
-        <div class="stat-label">Tasks Done</div>
-      </div>
-    </section>
+      <button id="manageBlocklistBtn" class="link-action"></button>
+    </main>
 
-    <!-- Quick Actions -->
-    <section class="quick-actions">
-      <button id="manageBlocklistBtn" class="action-btn">
-        🚫 Manage Blocklist
-      </button>
-      <button id="integrationsBtn" class="action-btn">
-        🔗 Integrations
-      </button>
-    </section>
+    <!-- Configure view: pick task + duration + mode, manage tasks -->
+    <main id="configureView" class="view hidden">
+      <button id="backToHomeBtn" class="back-link"></button>
+
+      <section class="card start-card">
+        <h2 class="card-title">Start a focus session</h2>
+
+        <div class="field">
+          <label>Task</label>
+          <div id="taskPicker" class="task-picker"></div>
+        </div>
+
+        <div class="field">
+          <label>Duration</label>
+          <div class="chip-row" id="durationChips"></div>
+          <input type="range" class="slider" id="durationSlider" min="5" max="120" step="5" value="25">
+          <div class="slider-readout" id="durationLabel">25 min</div>
+        </div>
+
+        <div class="field">
+          <label>Mode</label>
+          <div class="segmented" id="modeSegmented">
+            <button type="button" data-mode="single" class="active"></button>
+            <button type="button" data-mode="cycle"></button>
+          </div>
+        </div>
+
+        <div id="cycleOptions" class="cycle-options hidden">
+          <div class="field">
+            <label>Break length</label>
+            <div class="chip-row" id="breakChips"></div>
+          </div>
+          <div class="field">
+            <label>Rounds</label>
+            <div class="chip-row" id="roundsChips"></div>
+          </div>
+        </div>
+
+        <button id="startBtn" class="btn btn-primary btn-full"></button>
+      </section>
+
+      <section class="tasks-section">
+        <div class="section-header">
+          <h2 class="card-title">Your tasks</h2>
+          <button id="addTaskBtn" class="btn btn-secondary btn-sm"></button>
+        </div>
+        <div id="taskList" class="task-list"></div>
+      </section>
+    </main>
+
+    <!-- Session view: live countdown -->
+    <main id="sessionView" class="view hidden">
+      <section class="session-card">
+        <div class="session-ring-wrap">
+          <svg class="progress-ring" viewBox="0 0 120 120">
+            <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+            <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="52"></circle>
+          </svg>
+          <div class="session-center">
+            <div id="sessionTime" class="session-time">25:00</div>
+            <div id="sessionPhase" class="badge badge-focus">Focus</div>
+          </div>
+        </div>
+        <div id="sessionTaskTitle" class="session-task-title">Focus session</div>
+        <div id="sessionRound" class="session-round hidden"></div>
+        <button id="stopBtn" class="btn btn-danger btn-full"></button>
+      </section>
+    </main>
   </div>
 
+  <script src="icons.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>
-
