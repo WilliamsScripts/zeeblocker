@@ -22,7 +22,7 @@ const BREAK_BELL_SOUNDS = [
 
 const FOCUS_MUSIC_TRACKS = [
   { name: 'Lofi Music', file: 'sounds/focus-music/Lofi Music.webm' },
-  { name: 'Lofi Music 2', file: 'sounds/focus-music/lofi 2.webm' },
+  { name: 'Lofi Music 2', fsile: 'sounds/focus-music/lofi 2.webm' },
   { name: 'Lofi beat', file: 'sounds/focus-music/mirostar-lofi-beats-531504.mp3' }
 ];
 
