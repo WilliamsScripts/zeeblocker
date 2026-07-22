@@ -28,7 +28,9 @@ const ICONS = {
   mail: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/>',
   'chevron-down': '<path d="m6 9 6 6 6-6"/>',
   music: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
-  'music-off': '<path d="M9 18V5l7.29-1.22M21 5v11"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><path d="m2 2 20 20"/>'
+  'music-off': '<path d="M9 18V5l7.29-1.22M21 5v11"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><path d="m2 2 20 20"/>',
+  'skip-back': '<path d="M19 20 9 12l10-8v16Z"/><path d="M5 19V5"/>',
+  'skip-forward': '<path d="M5 4l10 8-10 8V4Z"/><path d="M19 5v14"/>'
 };
 
 function renderIcon(name, className = 'icon') {

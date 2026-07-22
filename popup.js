@@ -22,6 +22,8 @@ const state = {
 };
 
 let sessionTickHandle = null;
+let cachedNowPlaying = null;
+let seekBarDirty = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
   renderStaticIcons();
@@ -32,7 +34,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderDurationChips();
   renderBreakChips();
   renderRoundChips();
-  await loadMusicToggleState();
   await refreshView();
 });
 
@@ -47,29 +48,38 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
   if (namespace === 'local' && (changes.sitesBlocked || changes.focusMinutes)) {
     loadStats();
   }
-  if (namespace === 'sync' && changes.focusMusicEnabled) {
-    renderMusicToggleIcon(changes.focusMusicEnabled.newValue !== false);
+  if (namespace === 'local' && changes.musicNowPlaying) {
+    cachedNowPlaying = changes.musicNowPlaying.newValue || null;
+    renderMusicWidget(cachedNowPlaying);
   }
 });
 
-// ---- Focus music quick toggle ----
-async function loadMusicToggleState() {
-  const { focusMusicEnabled } = await chrome.storage.sync.get(['focusMusicEnabled']);
-  renderMusicToggleIcon(focusMusicEnabled !== false);
+// ---- Mini music player ----
+function renderMusicWidget(nowPlaying) {
+  const nameEl = document.getElementById('musicTrackName');
+  const seekBar = document.getElementById('musicSeekBar');
+  const playPauseBtn = document.getElementById('musicPlayPauseBtn');
+
+  if (!nowPlaying) {
+    nameEl.textContent = 'Focus music';
+    playPauseBtn.innerHTML = renderIcon('play', 'icon-sm');
+    return;
+  }
+
+  nameEl.textContent = nowPlaying.trackName || 'Focus music';
+  playPauseBtn.innerHTML = renderIcon(nowPlaying.paused ? 'play' : 'pause', 'icon-sm');
+
+  if (!seekBarDirty) {
+    seekBar.max = Math.max(0, Math.floor(nowPlaying.duration || 0));
+    seekBar.value = Math.floor(nowPlaying.currentTime || 0);
+  }
+  document.getElementById('musicCurrentTime').textContent = formatDuration((nowPlaying.currentTime || 0) * 1000);
+  document.getElementById('musicDuration').textContent = formatDuration((nowPlaying.duration || 0) * 1000);
 }
 
-function renderMusicToggleIcon(enabled) {
-  const btn = document.getElementById('musicToggleBtn');
-  btn.innerHTML = renderIcon(enabled ? 'music' : 'music-off', 'icon-sm');
-  btn.title = enabled ? 'Focus music on — tap to mute' : 'Focus music off — tap to unmute';
-  btn.classList.toggle('active', enabled);
-}
-
-async function toggleFocusMusic() {
-  const { focusMusicEnabled } = await chrome.storage.sync.get(['focusMusicEnabled']);
-  const nextEnabled = focusMusicEnabled === false;
-  await chrome.runtime.sendMessage({ action: 'setFocusMusicEnabled', enabled: nextEnabled });
-  renderMusicToggleIcon(nextEnabled);
+async function toggleMusicPlayPause() {
+  const isPaused = cachedNowPlaying ? cachedNowPlaying.paused : true;
+  await chrome.runtime.sendMessage({ action: 'setFocusMusicEnabled', enabled: isPaused });
 }
 
 // ---- Pause / resume ----
@@ -96,6 +106,9 @@ function renderStaticIcons() {
   document.getElementById('startBtn').innerHTML = `${renderIcon('play', 'icon')}<span>Start Focus Session</span>`;
   document.getElementById('stopBtn').innerHTML = `${renderIcon('stop', 'icon')}<span>Stop Session</span>`;
   document.getElementById('pauseResumeBtn').innerHTML = `${renderIcon('pause', 'icon')}<span>Pause</span>`;
+  document.getElementById('musicPrevBtn').innerHTML = renderIcon('skip-back', 'icon-sm');
+  document.getElementById('musicNextBtn').innerHTML = renderIcon('skip-forward', 'icon-sm');
+  document.getElementById('musicPlayPauseBtn').innerHTML = renderIcon('play', 'icon-sm');
   document.querySelector('#modeSegmented [data-mode="single"]').innerHTML = `${renderIcon('target', 'icon-sm')}<span>Single session</span>`;
   document.querySelector('#modeSegmented [data-mode="cycle"]').innerHTML = `${renderIcon('repeat', 'icon-sm')}<span>Work / Break</span>`;
 }
@@ -135,7 +148,25 @@ function setupEventListeners() {
   document.getElementById('startBtn').addEventListener('click', startSession);
   document.getElementById('stopBtn').addEventListener('click', stopSession);
   document.getElementById('pauseResumeBtn').addEventListener('click', togglePauseResume);
-  document.getElementById('musicToggleBtn').addEventListener('click', toggleFocusMusic);
+
+  document.getElementById('musicPlayPauseBtn').addEventListener('click', toggleMusicPlayPause);
+  document.getElementById('musicPrevBtn').addEventListener('click', () => {
+    chrome.runtime.sendMessage({ action: 'musicPrev' });
+  });
+  document.getElementById('musicNextBtn').addEventListener('click', () => {
+    chrome.runtime.sendMessage({ action: 'musicNext' });
+  });
+
+  const seekBar = document.getElementById('musicSeekBar');
+  seekBar.addEventListener('input', (e) => {
+    seekBarDirty = true;
+    document.getElementById('musicCurrentTime').textContent = formatDuration(parseInt(e.target.value, 10) * 1000);
+  });
+  seekBar.addEventListener('change', (e) => {
+    const positionSeconds = parseInt(e.target.value, 10);
+    chrome.runtime.sendMessage({ action: 'musicSeek', positionSeconds });
+    seekBarDirty = false;
+  });
 }
 
 function openCreateTask() {
@@ -406,6 +437,8 @@ async function refreshView() {
 
   if (activeSession) {
     showView('session');
+    const { musicNowPlaying } = await chrome.storage.local.get(['musicNowPlaying']);
+    cachedNowPlaying = musicNowPlaying || null;
     updateSessionView(activeSession);
     sessionTickHandle = setInterval(() => updateSessionView(activeSession), 1000);
   } else {
@@ -439,6 +472,12 @@ function updateSessionView(session) {
   pauseResumeBtn.innerHTML = session.paused
     ? `${renderIcon('play', 'icon')}<span>Resume</span>`
     : `${renderIcon('pause', 'icon')}<span>Pause</span>`;
+
+  const showMusicWidget = !isBreak && !session.paused;
+  document.getElementById('musicPlayerWidget').classList.toggle('hidden', !showMusicWidget);
+  if (showMusicWidget) {
+    renderMusicWidget(cachedNowPlaying);
+  }
 
   const ring = document.getElementById('ringFg');
   ring.style.strokeDasharray = `${RING_CIRCUMFERENCE}`;

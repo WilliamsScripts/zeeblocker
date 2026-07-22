@@ -122,9 +122,6 @@
     <!-- Session view: live countdown -->
     <main id="sessionView" class="view hidden">
       <section class="session-card">
-        <div class="session-top-controls">
-          <button id="musicToggleBtn" class="icon-btn" title="Toggle focus music" aria-label="Toggle focus music"></button>
-        </div>
         <div class="session-ring-wrap">
           <svg class="progress-ring" viewBox="0 0 120 120">
             <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
@@ -137,6 +134,21 @@
         </div>
         <div id="sessionTaskTitle" class="session-task-title">Focus session</div>
         <div id="sessionRound" class="session-round hidden"></div>
+
+        <div id="musicPlayerWidget" class="music-widget hidden">
+          <div class="music-track-name" id="musicTrackName">Focus music</div>
+          <input type="range" id="musicSeekBar" class="music-seek" min="0" max="0" step="1" value="0">
+          <div class="music-time-row">
+            <span id="musicCurrentTime">0:00</span>
+            <span id="musicDuration">0:00</span>
+          </div>
+          <div class="music-controls">
+            <button id="musicPrevBtn" class="icon-btn" title="Previous track" aria-label="Previous track"></button>
+            <button id="musicPlayPauseBtn" class="icon-btn" title="Play/pause music" aria-label="Play/pause music"></button>
+            <button id="musicNextBtn" class="icon-btn" title="Next track" aria-label="Next track"></button>
+          </div>
+        </div>
+
         <div class="session-actions">
           <button id="pauseResumeBtn" class="btn btn-secondary btn-full"></button>
           <button id="stopBtn" class="btn btn-danger btn-full"></button>

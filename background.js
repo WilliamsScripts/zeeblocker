@@ -398,23 +398,77 @@ async function suspendMusic() {
   sendToOffscreen({ target: 'offscreen', type: 'suspendMusic' });
 }
 
-// The offscreen document reports playback position back to us (it has no storage
-// access of its own to persist it) so a paused/stopped track resumes where it left off.
-async function saveMusicPosition(trackFile, positionSeconds) {
-  const trackIndex = Math.max(0, FOCUS_MUSIC_TRACKS.findIndex(t => t.file === trackFile));
+// The offscreen document reports playback position/status back to us every second
+// (it has no storage access of its own) so a paused/stopped track resumes where it
+// left off, and so the popup's mini player can show live "now playing" info.
+async function handleMusicStatusUpdate(status) {
+  const trackIndex = Math.max(0, FOCUS_MUSIC_TRACKS.findIndex(t => t.file === status.trackFile));
   await chrome.storage.local.set({
-    musicState: { trackIndex, positionSeconds: positionSeconds || 0 }
+    musicState: { trackIndex, positionSeconds: status.currentTime || 0 },
+    musicNowPlaying: {
+      trackFile: status.trackFile,
+      trackName: (FOCUS_MUSIC_TRACKS[trackIndex] || {}).name || '',
+      currentTime: status.currentTime || 0,
+      duration: status.duration || 0,
+      paused: status.paused,
+      trackIndex,
+      totalTracks: FOCUS_MUSIC_TRACKS.length
+    }
   });
 }
 
-// A track finished playing on its own: advance to the next one, or loop back to the
-// first ("start afresh") once we run out.
+// A track finished playing on its own without the proactive near-end crossfade having
+// fired (e.g. duration was unknown, or the track is shorter than the fade) — fall back
+// to just starting the next one, or looping back to the first once we run out.
 async function advanceMusicTrack(finishedTrackFile) {
   if (FOCUS_MUSIC_TRACKS.length === 0) return;
   const finishedIndex = Math.max(0, FOCUS_MUSIC_TRACKS.findIndex(t => t.file === finishedTrackFile));
   const nextIndex = (finishedIndex + 1) % FOCUS_MUSIC_TRACKS.length;
   await chrome.storage.local.set({ musicState: { trackIndex: nextIndex, positionSeconds: 0 } });
   await startOrResumeMusic();
+}
+
+// Proactive crossfade: offscreen.js tells us a track is a few seconds from ending,
+// we pick the next one and tell it to fade over — no hard cut between songs.
+async function handleMusicNearingEnd(finishedTrackFile) {
+  if (FOCUS_MUSIC_TRACKS.length === 0) return;
+  const finishedIndex = Math.max(0, FOCUS_MUSIC_TRACKS.findIndex(t => t.file === finishedTrackFile));
+  const nextIndex = (finishedIndex + 1) % FOCUS_MUSIC_TRACKS.length;
+  const track = FOCUS_MUSIC_TRACKS[nextIndex];
+  const { focusMusicVolume } = await chrome.storage.sync.get(['focusMusicVolume']);
+
+  await chrome.storage.local.set({ musicState: { trackIndex: nextIndex, positionSeconds: 0 } });
+  sendToOffscreen({
+    target: 'offscreen',
+    type: 'switchTrack',
+    file: track.file,
+    volume: focusMusicVolume ?? DEFAULT_FOCUS_MUSIC_VOLUME
+  });
+}
+
+// Manual next/prev from the popup's mini player: crossfade to the relative track.
+async function switchMusicTrack(direction) {
+  if (FOCUS_MUSIC_TRACKS.length === 0) return;
+  const { focusMusicVolume } = await chrome.storage.sync.get(['focusMusicVolume']);
+  const { musicState } = await chrome.storage.local.get(['musicState']);
+  const state = musicState || { trackIndex: 0, positionSeconds: 0 };
+  const currentIndex = ((state.trackIndex % FOCUS_MUSIC_TRACKS.length) + FOCUS_MUSIC_TRACKS.length) % FOCUS_MUSIC_TRACKS.length;
+  const nextIndex = ((currentIndex + direction) % FOCUS_MUSIC_TRACKS.length + FOCUS_MUSIC_TRACKS.length) % FOCUS_MUSIC_TRACKS.length;
+  const track = FOCUS_MUSIC_TRACKS[nextIndex];
+
+  await chrome.storage.local.set({ musicState: { trackIndex: nextIndex, positionSeconds: 0 } });
+  await ensureOffscreenDocument();
+  sendToOffscreen({
+    target: 'offscreen',
+    type: 'switchTrack',
+    file: track.file,
+    volume: focusMusicVolume ?? DEFAULT_FOCUS_MUSIC_VOLUME
+  });
+}
+
+// Manual seek from the popup's mini player.
+function seekMusic(positionSeconds) {
+  sendToOffscreen({ target: 'offscreen', type: 'seekMusic', positionSeconds });
 }
 
 chrome.storage.onChanged.addListener(async (changes, area) => {
@@ -564,12 +618,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   } else if (request.action === 'previewSound') {
     previewSound(request.file).then(() => sendResponse({ ok: true }));
     return true;
-  } else if (request.action === 'musicPositionUpdate') {
-    saveMusicPosition(request.trackFile, request.positionSeconds);
-    return false;
+  } else if (request.action === 'musicStatusUpdate') {
+    handleMusicStatusUpdate(request).then(() => sendResponse({ ok: true }));
+    return true;
   } else if (request.action === 'musicTrackEnded') {
     advanceMusicTrack(request.trackFile).then(() => sendResponse({ ok: true }));
     return true;
+  } else if (request.action === 'musicNearingEnd') {
+    handleMusicNearingEnd(request.trackFile).then(() => sendResponse({ ok: true }));
+    return true;
+  } else if (request.action === 'musicNext') {
+    switchMusicTrack(1).then(() => sendResponse({ ok: true }));
+    return true;
+  } else if (request.action === 'musicPrev') {
+    switchMusicTrack(-1).then(() => sendResponse({ ok: true }));
+    return true;
+  } else if (request.action === 'musicSeek') {
+    seekMusic(request.positionSeconds);
+    return false;
   }
 });
 
