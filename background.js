@@ -39,7 +39,8 @@ chrome.runtime.onInstalled.addListener(async () => {
     workBell: DEFAULT_WORK_BELL,
     breakBell: DEFAULT_BREAK_BELL,
     focusMusicEnabled: DEFAULT_FOCUS_MUSIC_ENABLED,
-    focusMusicVolume: DEFAULT_FOCUS_MUSIC_VOLUME
+    focusMusicVolume: DEFAULT_FOCUS_MUSIC_VOLUME,
+    idleAlertBellMode: DEFAULT_IDLE_ALERT_BELL_MODE
   };
 
   const existing = await chrome.storage.sync.get(Object.keys(defaultSettings));
@@ -115,9 +116,90 @@ async function checkIdleTime() {
   const idleState = await chrome.idle.queryState(settings.idleTimeThreshold * 60);
 
   if (idleState === 'idle') {
-    notify('Idle Detected', `You've been idle for ${settings.idleTimeThreshold} minutes. Time for a break?`);
+    await handleIdleDetected(settings.idleTimeThreshold);
+  } else {
+    await handleIdleCleared();
   }
 }
+
+// ---- Idle alert modal (in addition to the native Chrome notification) ----
+// Tracked in chrome.storage.session (in-memory, cleared on browser restart) rather
+// than a plain module variable, since the service worker can be torn down and
+// restarted independently of the alert window actually being open.
+
+async function handleIdleDetected(minutes) {
+  const { idleAlertWindowId } = await chrome.storage.session.get(['idleAlertWindowId']);
+
+  if (idleAlertWindowId && (await windowExists(idleAlertWindowId))) {
+    return; // already showing an alert for this idle stretch
+  }
+
+  notify('Idle Detected', `You've been idle for ${minutes} minutes. Time for a break?`);
+  await openIdleAlertWindow(minutes);
+}
+
+// Runs on every idle check (roughly once a minute) regardless of state, so the alert
+// auto-closes as soon as Chrome reports the user active again — not just when they
+// click "I'm back" on the modal itself.
+async function handleIdleCleared() {
+  const { idleAlertWindowId } = await chrome.storage.session.get(['idleAlertWindowId']);
+  if (!idleAlertWindowId) return;
+
+  await chrome.storage.session.remove(['idleAlertWindowId']);
+  try {
+    await chrome.windows.remove(idleAlertWindowId);
+  } catch (error) {
+    // already closed — nothing to do
+  }
+}
+
+async function windowExists(windowId) {
+  try {
+    await chrome.windows.get(windowId);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+async function openIdleAlertWindow(minutes) {
+  const win = await chrome.windows.create({
+    url: chrome.runtime.getURL(`idle-alert.html?minutes=${minutes}`),
+    type: 'popup',
+    width: 360,
+    height: 340,
+    focused: true
+  });
+  await chrome.storage.session.set({ idleAlertWindowId: win.id });
+
+  const { idleAlertBellMode } = await chrome.storage.sync.get(['idleAlertBellMode']);
+  const mode = idleAlertBellMode || DEFAULT_IDLE_ALERT_BELL_MODE;
+  if (mode !== 'off') {
+    await playBell('break');
+  }
+}
+
+// The offscreen document's bell finished playing. If an idle alert is still open and
+// the user has it set to ring continuously, ring it again — otherwise this is just a
+// normal one-shot bell (session transition, preview, or "ring once" idle alert).
+async function handleBellFinished() {
+  const { idleAlertWindowId } = await chrome.storage.session.get(['idleAlertWindowId']);
+  if (!idleAlertWindowId || !(await windowExists(idleAlertWindowId))) return;
+
+  const { idleAlertBellMode } = await chrome.storage.sync.get(['idleAlertBellMode']);
+  if ((idleAlertBellMode || DEFAULT_IDLE_ALERT_BELL_MODE) === 'continuous') {
+    await playBell('break');
+  }
+}
+
+// If the user dismisses the alert via the window's own close button (rather than the
+// "I'm back" button, which just calls window.close()), make sure we still notice.
+chrome.windows.onRemoved.addListener(async (windowId) => {
+  const { idleAlertWindowId } = await chrome.storage.session.get(['idleAlertWindowId']);
+  if (windowId === idleAlertWindowId) {
+    await chrome.storage.session.remove(['idleAlertWindowId']);
+  }
+});
 
 // ---- Pomodoro session state machine ----
 // activeSession (storage.local): {
@@ -635,6 +717,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   } else if (request.action === 'musicSeek') {
     seekMusic(request.positionSeconds);
+    return false;
+  } else if (request.action === 'bellFinished') {
+    handleBellFinished();
     return false;
   }
 });

@@ -84,6 +84,10 @@ const DEFAULT_WORK_BELL = WORK_BELL_SOUNDS[0].file;
 const DEFAULT_BREAK_BELL = BREAK_BELL_SOUNDS[0].file;
 const DEFAULT_FOCUS_MUSIC_ENABLED = true;
 const DEFAULT_FOCUS_MUSIC_VOLUME = 0.5;
+// 'once' is the default: the modal window already stays open and hard to miss, so a
+// single ring is enough to get attention without becoming an alarm-clock-style nuisance
+// if the user is away for a while.
+const DEFAULT_IDLE_ALERT_BELL_MODE = 'once';
 
 function soundUrl(path) {
   return chrome.runtime.getURL(path.split('/').map(encodeURIComponent).join('/'));

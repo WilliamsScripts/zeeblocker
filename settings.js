@@ -1,5 +1,14 @@
 // Settings page script
 
+// Fields covered by the batch "Save Settings" button — used to show the unsaved-
+// changes reminder banner (deliberately excludes the blocklist add-site inputs,
+// which save immediately via their own Add buttons, not this flow).
+const SAVE_TRACKED_FIELD_IDS = [
+  'darkModeToggle', 'idleCheckToggle', 'idleThreshold', 'idleBellModeSelect',
+  'childSafetyToggle', 'parentEmail',
+  'workBellSelect', 'breakBellSelect', 'focusMusicToggle', 'focusMusicVolume'
+];
+
 document.addEventListener('DOMContentLoaded', async () => {
   renderStaticIcons();
   await loadSettings();
@@ -60,6 +69,13 @@ function setupEventListeners() {
     previewSound(document.getElementById('breakBellSelect').value);
   });
 
+  SAVE_TRACKED_FIELD_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', showUnsavedBanner);
+    el.addEventListener('change', showUnsavedBanner);
+  });
+
   chrome.runtime.onMessage.addListener((request) => {
     if (request.action === 'navigateToTab') {
       document.querySelector(`[data-tab="${request.tab}"]`)?.click();
@@ -104,6 +120,20 @@ async function loadSettings() {
   document.getElementById('focusMusicToggle').checked = settings.focusMusicEnabled !== false;
   const volume = settings.focusMusicVolume ?? DEFAULT_FOCUS_MUSIC_VOLUME;
   document.getElementById('focusMusicVolume').value = Math.round(volume * 100);
+  document.getElementById('idleBellModeSelect').value = settings.idleAlertBellMode || DEFAULT_IDLE_ALERT_BELL_MODE;
+
+  hideUnsavedBanner();
+}
+
+// ---- Unsaved changes reminder ----
+function showUnsavedBanner() {
+  const banner = document.getElementById('unsavedBanner');
+  banner.querySelector('span').textContent = 'You have unsaved changes — scroll down and click Save Settings to keep them.';
+  banner.classList.remove('hidden');
+}
+
+function hideUnsavedBanner() {
+  document.getElementById('unsavedBanner').classList.add('hidden');
 }
 
 // Populate the bell dropdowns from the shared sound catalog
@@ -273,7 +303,8 @@ async function saveSettings() {
     workBell: document.getElementById('workBellSelect').value,
     breakBell: document.getElementById('breakBellSelect').value,
     focusMusicEnabled: document.getElementById('focusMusicToggle').checked,
-    focusMusicVolume: parseInt(document.getElementById('focusMusicVolume').value, 10) / 100
+    focusMusicVolume: parseInt(document.getElementById('focusMusicVolume').value, 10) / 100,
+    idleAlertBellMode: document.getElementById('idleBellModeSelect').value
   };
 
   await chrome.storage.sync.set(settings);
@@ -284,6 +315,7 @@ async function saveSettings() {
     document.documentElement.removeAttribute('data-theme');
   }
 
+  hideUnsavedBanner();
   showToast('Settings saved successfully!');
 }
 
@@ -321,7 +353,8 @@ async function resetSettings() {
     workBell: DEFAULT_WORK_BELL,
     breakBell: DEFAULT_BREAK_BELL,
     focusMusicEnabled: DEFAULT_FOCUS_MUSIC_ENABLED,
-    focusMusicVolume: DEFAULT_FOCUS_MUSIC_VOLUME
+    focusMusicVolume: DEFAULT_FOCUS_MUSIC_VOLUME,
+    idleAlertBellMode: DEFAULT_IDLE_ALERT_BELL_MODE
   };
 
   await chrome.storage.sync.set(defaultSettings);

@@ -9,6 +9,10 @@
   <link rel="stylesheet" href="styles/settings.css">
 </head>
 <body>
+  <div id="unsavedBanner" class="unsaved-banner hidden">
+    <span></span>
+  </div>
+
   <div class="container">
     <header>
       <div class="brand" id="brandLogo"></div>
@@ -56,6 +60,18 @@
               <p>Minutes of inactivity before notification</p>
             </div>
             <input type="number" id="idleThreshold" min="1" max="60" value="10" class="input-field setting-input">
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <h3>Idle Alert Bell</h3>
+              <p>When you're idle, a modal pops up alongside the Chrome notification. Choose how the bell behaves.</p>
+            </div>
+            <select id="idleBellModeSelect" class="input-field setting-input">
+              <option value="off">Off (modal only, no sound)</option>
+              <option value="once">Ring once (Recommended)</option>
+              <option value="continuous">Ring continuously until dismissed</option>
+            </select>
           </div>
         </div>
       </section>

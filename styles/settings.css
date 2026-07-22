@@ -6,6 +6,33 @@ body {
   margin: 0;
 }
 
+/* Unsaved changes reminder — fixed so it's visible without scrolling, since Save
+   lives in the footer at the bottom of a potentially long page */
+.unsaved-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+  border-bottom: 1px solid var(--color-warning);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  transform: translateY(-100%);
+  transition: transform var(--transition-base);
+}
+
+.unsaved-banner:not(.hidden) {
+  transform: translateY(0);
+}
+
 .container {
   max-width: 900px;
   margin: 0 auto;

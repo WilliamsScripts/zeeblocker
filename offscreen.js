@@ -231,3 +231,9 @@ musicPlayers.forEach(player => {
     chrome.runtime.sendMessage({ action: 'musicTrackEnded', trackFile: currentTrackFile });
   });
 });
+
+// Lets background.js loop the idle-alert bell ("ring continuously") by re-triggering
+// playBell whenever the previous play finishes — see handleBellFinished there.
+bellPlayer.addEventListener('ended', () => {
+  chrome.runtime.sendMessage({ action: 'bellFinished' });
+});
