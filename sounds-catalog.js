@@ -25,7 +25,8 @@ const IDLE_ALERT_SOUNDS = [...WORK_BELL_SOUNDS, ...BREAK_BELL_SOUNDS].filter(
 const FOCUS_MUSIC_TRACKS = [
   // { name: 'Lofi Music', file: 'sounds/focus-music/Lofi Music.webm' },
   // { name: 'Lofi Music 2', file: 'sounds/focus-music/lofi 2.webm' },
-  { name: 'Lofi beat', file: 'sounds/focus-music/mirostar-lofi-beats-531504.mp3' },
+  // 'Lofi beat' (sounds/focus-music/mirostar-lofi-beats-531504.mp3) removed: the local
+  // file was deleted during the move to the CDN and was never re-uploaded there.
   { name: 'Alex Morgan Corporate Lofi Flute Presentation', file: 'https://res.cloudinary.com/dggkilsor/video/upload/v1784698488/zeeblocker/focus-music/alex-morgan-corporate-lofi-flute-presentation-560069_amsfqy.mp3' },
   { name: 'Alex Morgan Corporate Lofi Groove Advertising', file: 'https://res.cloudinary.com/dggkilsor/video/upload/v1784698498/zeeblocker/focus-music/alex-morgan-corporate-lofi-groove-advertising-560068_ntbc17.mp3' },
   { name: 'Alex Morgan Lofi Cocktail Bar', file: 'https://res.cloudinary.com/dggkilsor/video/upload/v1784698490/zeeblocker/focus-music/alex-morgan-lofi-cocktail-bar-568153_sqeh6d.mp3' },

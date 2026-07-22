@@ -106,11 +106,14 @@ async function initStats() {
   }
 }
 
-// Check idle time
+// Check idle time — only relevant while a focus session is actively running; being
+// idle while there's no session (or during a break, or a paused session) isn't the
+// user slacking off on a focus block, so it shouldn't buzz them.
 async function checkIdleTime() {
   const settings = await chrome.storage.sync.get(['idleCheckEnabled', 'idleTimeThreshold']);
 
-  if (!settings.idleCheckEnabled) {
+  if (!settings.idleCheckEnabled || !(await isFocusSessionActive())) {
+    await handleIdleCleared(); // don't leave a stale alert open if focus just ended
     return;
   }
 
@@ -121,6 +124,11 @@ async function checkIdleTime() {
   } else {
     await handleIdleCleared();
   }
+}
+
+async function isFocusSessionActive() {
+  const { activeSession } = await chrome.storage.local.get(['activeSession']);
+  return !!activeSession && activeSession.phase === 'focus' && !activeSession.paused;
 }
 
 // ---- Idle alert modal (in addition to the native Chrome notification) ----
