@@ -4,7 +4,7 @@
 // changes reminder banner (deliberately excludes the blocklist add-site inputs,
 // which save immediately via their own Add buttons, not this flow).
 const SAVE_TRACKED_FIELD_IDS = [
-  'darkModeToggle', 'idleCheckToggle', 'idleThreshold', 'idleBellModeSelect',
+  'darkModeToggle', 'idleCheckToggle', 'idleThreshold', 'idleBellModeSelect', 'idleAlertSoundSelect',
   'childSafetyToggle', 'parentEmail',
   'workBellSelect', 'breakBellSelect', 'focusMusicToggle', 'focusMusicVolume'
 ];
@@ -23,6 +23,7 @@ function renderStaticIcons() {
   document.getElementById('saveBtn').innerHTML = `${renderIcon('check', 'icon-sm')}<span>Save Settings</span>`;
   document.getElementById('previewWorkBellBtn').innerHTML = renderIcon('play', 'icon-sm');
   document.getElementById('previewBreakBellBtn').innerHTML = renderIcon('play', 'icon-sm');
+  document.getElementById('previewIdleAlertSoundBtn').innerHTML = renderIcon('play', 'icon-sm');
 
   document.querySelector('.alert-info').innerHTML = `
     ${renderIcon('info', 'icon-sm')}
@@ -68,6 +69,9 @@ function setupEventListeners() {
   document.getElementById('previewBreakBellBtn').addEventListener('click', () => {
     previewSound(document.getElementById('breakBellSelect').value);
   });
+  document.getElementById('previewIdleAlertSoundBtn').addEventListener('click', () => {
+    previewSound(document.getElementById('idleAlertSoundSelect').value);
+  });
 
   SAVE_TRACKED_FIELD_IDS.forEach(id => {
     const el = document.getElementById(id);
@@ -96,7 +100,9 @@ async function loadSettings() {
     'workBell',
     'breakBell',
     'focusMusicEnabled',
-    'focusMusicVolume'
+    'focusMusicVolume',
+    'idleAlertBellMode',
+    'idleAlertSound'
   ]);
 
   document.getElementById('darkModeToggle').checked = settings.darkMode || false;
@@ -121,6 +127,7 @@ async function loadSettings() {
   const volume = settings.focusMusicVolume ?? DEFAULT_FOCUS_MUSIC_VOLUME;
   document.getElementById('focusMusicVolume').value = Math.round(volume * 100);
   document.getElementById('idleBellModeSelect').value = settings.idleAlertBellMode || DEFAULT_IDLE_ALERT_BELL_MODE;
+  document.getElementById('idleAlertSoundSelect').value = settings.idleAlertSound || DEFAULT_IDLE_ALERT_SOUND;
 
   hideUnsavedBanner();
 }
@@ -140,6 +147,7 @@ function hideUnsavedBanner() {
 function renderBellOptions() {
   document.getElementById('workBellSelect').innerHTML = bellOptionsHtml(WORK_BELL_SOUNDS);
   document.getElementById('breakBellSelect').innerHTML = bellOptionsHtml(BREAK_BELL_SOUNDS);
+  document.getElementById('idleAlertSoundSelect').innerHTML = bellOptionsHtml(IDLE_ALERT_SOUNDS);
 }
 
 function bellOptionsHtml(sounds) {
@@ -304,7 +312,8 @@ async function saveSettings() {
     breakBell: document.getElementById('breakBellSelect').value,
     focusMusicEnabled: document.getElementById('focusMusicToggle').checked,
     focusMusicVolume: parseInt(document.getElementById('focusMusicVolume').value, 10) / 100,
-    idleAlertBellMode: document.getElementById('idleBellModeSelect').value
+    idleAlertBellMode: document.getElementById('idleBellModeSelect').value,
+    idleAlertSound: document.getElementById('idleAlertSoundSelect').value
   };
 
   await chrome.storage.sync.set(settings);
@@ -354,7 +363,8 @@ async function resetSettings() {
     breakBell: DEFAULT_BREAK_BELL,
     focusMusicEnabled: DEFAULT_FOCUS_MUSIC_ENABLED,
     focusMusicVolume: DEFAULT_FOCUS_MUSIC_VOLUME,
-    idleAlertBellMode: DEFAULT_IDLE_ALERT_BELL_MODE
+    idleAlertBellMode: DEFAULT_IDLE_ALERT_BELL_MODE,
+    idleAlertSound: DEFAULT_IDLE_ALERT_SOUND
   };
 
   await chrome.storage.sync.set(defaultSettings);

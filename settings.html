@@ -69,9 +69,20 @@
             </div>
             <select id="idleBellModeSelect" class="input-field setting-input">
               <option value="off">Off (modal only, no sound)</option>
-              <option value="once">Ring once (Recommended)</option>
-              <option value="continuous">Ring continuously until dismissed</option>
+              <option value="once">Ring once</option>
+              <option value="continuous">Ring continuously until dismissed (Recommended)</option>
             </select>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <h3>Idle Alarm Sound</h3>
+              <p>Defaults to your Focus/Time's Up bell, but you can pick a different sound just for idle alerts.</p>
+            </div>
+            <div class="sound-picker">
+              <select id="idleAlertSoundSelect" class="input-field setting-input"></select>
+              <button id="previewIdleAlertSoundBtn" class="icon-btn" title="Preview" aria-label="Preview idle alarm sound"></button>
+            </div>
           </div>
         </div>
       </section>

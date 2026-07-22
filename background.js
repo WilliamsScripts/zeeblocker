@@ -40,7 +40,8 @@ chrome.runtime.onInstalled.addListener(async () => {
     breakBell: DEFAULT_BREAK_BELL,
     focusMusicEnabled: DEFAULT_FOCUS_MUSIC_ENABLED,
     focusMusicVolume: DEFAULT_FOCUS_MUSIC_VOLUME,
-    idleAlertBellMode: DEFAULT_IDLE_ALERT_BELL_MODE
+    idleAlertBellMode: DEFAULT_IDLE_ALERT_BELL_MODE,
+    idleAlertSound: DEFAULT_IDLE_ALERT_SOUND
   };
 
   const existing = await chrome.storage.sync.get(Object.keys(defaultSettings));
@@ -175,7 +176,7 @@ async function openIdleAlertWindow(minutes) {
   const { idleAlertBellMode } = await chrome.storage.sync.get(['idleAlertBellMode']);
   const mode = idleAlertBellMode || DEFAULT_IDLE_ALERT_BELL_MODE;
   if (mode !== 'off') {
-    await playBell('break');
+    await playIdleAlertSound();
   }
 }
 
@@ -188,8 +189,17 @@ async function handleBellFinished() {
 
   const { idleAlertBellMode } = await chrome.storage.sync.get(['idleAlertBellMode']);
   if ((idleAlertBellMode || DEFAULT_IDLE_ALERT_BELL_MODE) === 'continuous') {
-    await playBell('break');
+    await playIdleAlertSound();
   }
+}
+
+// Plays whichever sound the user picked for idle alerts (defaults to the focus/
+// "time's up" bell, but is independently configurable from the work/break bells).
+async function playIdleAlertSound() {
+  const { idleAlertSound } = await chrome.storage.sync.get(['idleAlertSound']);
+  const file = idleAlertSound || DEFAULT_IDLE_ALERT_SOUND;
+  await ensureOffscreenDocument();
+  sendToOffscreen({ target: 'offscreen', type: 'playBell', file });
 }
 
 // If the user dismisses the alert via the window's own close button (rather than the
