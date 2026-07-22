@@ -1,7 +1,3 @@
-// Shared catalog of bundled sound assets. Loaded by background.js (via importScripts),
-// offscreen.js, and settings.js so they all agree on what's available and what the
-// defaults are.
-
 const WORK_BELL_SOUNDS = [
   { name: 'School Bell', file: 'sounds/time-up/emg5991-school-bell.mp3' },
   { name: 'School Bell (Alt)', file: 'sounds/time-up/universfield-school-bell.mp3' },
@@ -31,8 +27,6 @@ const DEFAULT_BREAK_BELL = BREAK_BELL_SOUNDS[0].file;
 const DEFAULT_FOCUS_MUSIC_ENABLED = true;
 const DEFAULT_FOCUS_MUSIC_VOLUME = 0.5;
 
-// chrome.runtime.getURL() doesn't encode spaces/special characters in the path,
-// which breaks <audio src> for files like "Lofi Music.webm".
 function soundUrl(path) {
   return chrome.runtime.getURL(path.split('/').map(encodeURIComponent).join('/'));
 }
