@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderDurationChips();
   renderBreakChips();
   renderRoundChips();
+  await loadMusicToggleState();
   await refreshView();
 });
 
@@ -46,7 +47,40 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
   if (namespace === 'local' && (changes.sitesBlocked || changes.focusMinutes)) {
     loadStats();
   }
+  if (namespace === 'sync' && changes.focusMusicEnabled) {
+    renderMusicToggleIcon(changes.focusMusicEnabled.newValue !== false);
+  }
 });
+
+// ---- Focus music quick toggle ----
+async function loadMusicToggleState() {
+  const { focusMusicEnabled } = await chrome.storage.sync.get(['focusMusicEnabled']);
+  renderMusicToggleIcon(focusMusicEnabled !== false);
+}
+
+function renderMusicToggleIcon(enabled) {
+  const btn = document.getElementById('musicToggleBtn');
+  btn.innerHTML = renderIcon(enabled ? 'music' : 'music-off', 'icon-sm');
+  btn.title = enabled ? 'Focus music on — tap to mute' : 'Focus music off — tap to unmute';
+  btn.classList.toggle('active', enabled);
+}
+
+async function toggleFocusMusic() {
+  const { focusMusicEnabled } = await chrome.storage.sync.get(['focusMusicEnabled']);
+  const nextEnabled = focusMusicEnabled === false;
+  await chrome.runtime.sendMessage({ action: 'setFocusMusicEnabled', enabled: nextEnabled });
+  renderMusicToggleIcon(nextEnabled);
+}
+
+// ---- Pause / resume ----
+async function togglePauseResume() {
+  const { activeSession } = await chrome.storage.local.get(['activeSession']);
+  if (!activeSession) return;
+
+  const action = activeSession.paused ? 'resumeSession' : 'pauseSession';
+  await chrome.runtime.sendMessage({ action });
+  await refreshView();
+}
 
 function renderStaticIcons() {
   document.getElementById('brandLogo').innerHTML = `${renderIcon('target', 'icon icon-lg')}<span>ZeeBlocker</span>`;
@@ -61,6 +95,7 @@ function renderStaticIcons() {
   document.getElementById('addTaskBtn').innerHTML = `${renderIcon('plus', 'icon-sm')}<span>New Task</span>`;
   document.getElementById('startBtn').innerHTML = `${renderIcon('play', 'icon')}<span>Start Focus Session</span>`;
   document.getElementById('stopBtn').innerHTML = `${renderIcon('stop', 'icon')}<span>Stop Session</span>`;
+  document.getElementById('pauseResumeBtn').innerHTML = `${renderIcon('pause', 'icon')}<span>Pause</span>`;
   document.querySelector('#modeSegmented [data-mode="single"]').innerHTML = `${renderIcon('target', 'icon-sm')}<span>Single session</span>`;
   document.querySelector('#modeSegmented [data-mode="cycle"]').innerHTML = `${renderIcon('repeat', 'icon-sm')}<span>Work / Break</span>`;
 }
@@ -99,6 +134,8 @@ function setupEventListeners() {
 
   document.getElementById('startBtn').addEventListener('click', startSession);
   document.getElementById('stopBtn').addEventListener('click', stopSession);
+  document.getElementById('pauseResumeBtn').addEventListener('click', togglePauseResume);
+  document.getElementById('musicToggleBtn').addEventListener('click', toggleFocusMusic);
 }
 
 function openCreateTask() {
@@ -380,8 +417,13 @@ async function refreshView() {
 function updateSessionView(session) {
   const isBreak = session.phase === 'break';
   const phaseEl = document.getElementById('sessionPhase');
-  phaseEl.textContent = isBreak ? 'Break' : 'Focus';
-  phaseEl.className = `badge ${isBreak ? 'badge-break' : 'badge-focus'}`;
+  if (session.paused) {
+    phaseEl.textContent = 'Paused';
+    phaseEl.className = 'badge badge-paused';
+  } else {
+    phaseEl.textContent = isBreak ? 'Break' : 'Focus';
+    phaseEl.className = `badge ${isBreak ? 'badge-break' : 'badge-focus'}`;
+  }
 
   document.getElementById('sessionTaskTitle').textContent = session.taskTitle || (isBreak ? 'Recharge and stretch' : 'Focus session');
 
@@ -393,6 +435,11 @@ function updateSessionView(session) {
     roundEl.classList.add('hidden');
   }
 
+  const pauseResumeBtn = document.getElementById('pauseResumeBtn');
+  pauseResumeBtn.innerHTML = session.paused
+    ? `${renderIcon('play', 'icon')}<span>Resume</span>`
+    : `${renderIcon('pause', 'icon')}<span>Pause</span>`;
+
   const ring = document.getElementById('ringFg');
   ring.style.strokeDasharray = `${RING_CIRCUMFERENCE}`;
 
@@ -402,8 +449,11 @@ function updateSessionView(session) {
     return;
   }
 
+  // While paused, freeze the countdown at the moment it was paused instead of
+  // letting it keep ticking down against the wall clock.
+  const now = session.paused ? session.pausedAt : Date.now();
   const totalMs = session.endsAt - session.phaseStartedAt;
-  const remainingMs = Math.max(0, session.endsAt - Date.now());
+  const remainingMs = Math.max(0, session.endsAt - now);
   const fractionElapsed = totalMs > 0 ? 1 - remainingMs / totalMs : 1;
 
   document.getElementById('sessionTime').textContent = formatDuration(remainingMs);

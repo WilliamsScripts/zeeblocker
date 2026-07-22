@@ -12,6 +12,8 @@ function renderStaticIcons() {
   document.getElementById('addSiteBtn').innerHTML = `${renderIcon('plus', 'icon-sm')}<span>Add Site</span>`;
   document.getElementById('addAdultSiteBtn').innerHTML = `${renderIcon('plus', 'icon-sm')}<span>Add Site</span>`;
   document.getElementById('saveBtn').innerHTML = `${renderIcon('check', 'icon-sm')}<span>Save Settings</span>`;
+  document.getElementById('previewWorkBellBtn').innerHTML = renderIcon('play', 'icon-sm');
+  document.getElementById('previewBreakBellBtn').innerHTML = renderIcon('play', 'icon-sm');
 
   document.querySelector('.alert-info').innerHTML = `
     ${renderIcon('info', 'icon-sm')}
@@ -51,6 +53,13 @@ function setupEventListeners() {
   document.getElementById('addSiteBtn').addEventListener('click', addDistractingSite);
   document.getElementById('addAdultSiteBtn').addEventListener('click', addAdultSite);
 
+  document.getElementById('previewWorkBellBtn').addEventListener('click', () => {
+    previewSound(document.getElementById('workBellSelect').value);
+  });
+  document.getElementById('previewBreakBellBtn').addEventListener('click', () => {
+    previewSound(document.getElementById('breakBellSelect').value);
+  });
+
   chrome.runtime.onMessage.addListener((request) => {
     if (request.action === 'navigateToTab') {
       document.querySelector(`[data-tab="${request.tab}"]`)?.click();
@@ -67,7 +76,11 @@ async function loadSettings() {
     'distractingSites',
     'childSafetyMode',
     'parentEmail',
-    'adultSites'
+    'adultSites',
+    'workBell',
+    'breakBell',
+    'focusMusicEnabled',
+    'focusMusicVolume'
   ]);
 
   document.getElementById('darkModeToggle').checked = settings.darkMode || false;
@@ -84,6 +97,28 @@ async function loadSettings() {
   document.getElementById('parentEmail').value = settings.parentEmail || '';
   renderAdultSites(settings.adultSites || []);
   await loadAccessAttempts();
+
+  renderBellOptions();
+  document.getElementById('workBellSelect').value = settings.workBell || DEFAULT_WORK_BELL;
+  document.getElementById('breakBellSelect').value = settings.breakBell || DEFAULT_BREAK_BELL;
+  document.getElementById('focusMusicToggle').checked = settings.focusMusicEnabled !== false;
+  const volume = settings.focusMusicVolume ?? DEFAULT_FOCUS_MUSIC_VOLUME;
+  document.getElementById('focusMusicVolume').value = Math.round(volume * 100);
+}
+
+// Populate the bell dropdowns from the shared sound catalog
+function renderBellOptions() {
+  document.getElementById('workBellSelect').innerHTML = bellOptionsHtml(WORK_BELL_SOUNDS);
+  document.getElementById('breakBellSelect').innerHTML = bellOptionsHtml(BREAK_BELL_SOUNDS);
+}
+
+function bellOptionsHtml(sounds) {
+  return sounds.map(sound => `<option value="${escapeHtml(sound.file)}">${escapeHtml(sound.name)}</option>`).join('');
+}
+
+// Play a bell sound immediately so the user can hear their choice
+function previewSound(file) {
+  chrome.runtime.sendMessage({ action: 'previewSound', file });
 }
 
 // Render distracting sites
@@ -234,7 +269,11 @@ async function saveSettings() {
     idleCheckEnabled: document.getElementById('idleCheckToggle').checked,
     idleTimeThreshold: parseInt(document.getElementById('idleThreshold').value),
     childSafetyMode: document.getElementById('childSafetyToggle').checked,
-    parentEmail: document.getElementById('parentEmail').value
+    parentEmail: document.getElementById('parentEmail').value,
+    workBell: document.getElementById('workBellSelect').value,
+    breakBell: document.getElementById('breakBellSelect').value,
+    focusMusicEnabled: document.getElementById('focusMusicToggle').checked,
+    focusMusicVolume: parseInt(document.getElementById('focusMusicVolume').value, 10) / 100
   };
 
   await chrome.storage.sync.set(settings);
@@ -278,7 +317,11 @@ async function resetSettings() {
     childSafetyMode: false,
     parentEmail: '',
     idleTimeThreshold: 10,
-    idleCheckEnabled: false
+    idleCheckEnabled: false,
+    workBell: DEFAULT_WORK_BELL,
+    breakBell: DEFAULT_BREAK_BELL,
+    focusMusicEnabled: DEFAULT_FOCUS_MUSIC_ENABLED,
+    focusMusicVolume: DEFAULT_FOCUS_MUSIC_VOLUME
   };
 
   await chrome.storage.sync.set(defaultSettings);

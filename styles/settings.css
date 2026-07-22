@@ -148,6 +148,49 @@ header {
   max-width: 220px;
 }
 
+/* Sound picker: select + preview icon button */
+.sound-picker {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.sound-picker select {
+  max-width: 220px;
+}
+
+input[type="range"]#focusMusicVolume {
+  max-width: 220px;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-border);
+  outline: none;
+}
+
+input[type="range"]#focusMusicVolume::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  border: 3px solid var(--color-bg-elevated);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+}
+
+input[type="range"]#focusMusicVolume::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  border: 3px solid var(--color-bg-elevated);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+}
+
 /* Add Site Form */
 .add-site-form {
   display: flex;

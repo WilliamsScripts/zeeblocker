@@ -85,6 +85,10 @@
   outline-offset: 2px;
 }
 
+.icon-btn.active {
+  color: var(--color-primary);
+}
+
 /* Input fields */
 .field {
   display: flex;
@@ -326,6 +330,11 @@ input:focus-visible + .toggle-slider {
 .badge-break {
   background: var(--color-accent-soft);
   color: var(--color-accent);
+}
+
+.badge-paused {
+  background: var(--color-border);
+  color: var(--color-text-muted);
 }
 
 /* Range slider */

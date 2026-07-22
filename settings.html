@@ -17,6 +17,7 @@
 
     <nav class="tabs">
       <button class="tab-btn active" data-tab="general" data-icon="settings">General</button>
+      <button class="tab-btn" data-tab="sounds" data-icon="music">Sounds</button>
       <button class="tab-btn" data-tab="blocklist" data-icon="block">Blocklist</button>
       <button class="tab-btn" data-tab="child-safety" data-icon="shield">Child Safety</button>
     </nav>
@@ -55,6 +56,58 @@
               <p>Minutes of inactivity before notification</p>
             </div>
             <input type="number" id="idleThreshold" min="1" max="60" value="10" class="input-field setting-input">
+          </div>
+        </div>
+      </section>
+
+      <!-- Sounds Tab -->
+      <section id="sounds" class="tab-content">
+        <div class="section-card">
+          <h2>Bell Sounds</h2>
+          <p class="description">Choose what plays when a focus session or break ends.</p>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <h3>Focus Bell</h3>
+              <p>Plays when a focus session completes, or all rounds finish</p>
+            </div>
+            <div class="sound-picker">
+              <select id="workBellSelect" class="input-field setting-input"></select>
+              <button id="previewWorkBellBtn" class="icon-btn" title="Preview" aria-label="Preview focus bell"></button>
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <h3>Break Bell</h3>
+              <p>Plays when a Pomodoro break starts, so it's easy to tell apart from the focus bell</p>
+            </div>
+            <div class="sound-picker">
+              <select id="breakBellSelect" class="input-field setting-input"></select>
+              <button id="previewBreakBellBtn" class="icon-btn" title="Preview" aria-label="Preview break bell"></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h2>Focus Music</h2>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <h3>Play Focus Music</h3>
+              <p>Plays in the background during focus time. Pauses during breaks and resumes right where it left off.</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="focusMusicToggle">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <h3>Music Volume</h3>
+            </div>
+            <input type="range" id="focusMusicVolume" min="0" max="100" step="5" value="50" class="slider setting-input">
           </div>
         </div>
       </section>
@@ -123,6 +176,7 @@
   <div id="toast" class="toast"></div>
 
   <script src="icons.js"></script>
+  <script src="sounds-catalog.js"></script>
   <script src="settings.js"></script>
 </body>
 </html>

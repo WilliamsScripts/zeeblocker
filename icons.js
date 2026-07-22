@@ -26,7 +26,9 @@ const ICONS = {
   repeat: '<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>',
   info: '<circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/>',
   mail: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/>',
-  'chevron-down': '<path d="m6 9 6 6 6-6"/>'
+  'chevron-down': '<path d="m6 9 6 6 6-6"/>',
+  music: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  'music-off': '<path d="M9 18V5l7.29-1.22M21 5v11"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><path d="m2 2 20 20"/>'
 };
 
 function renderIcon(name, className = 'icon') {
